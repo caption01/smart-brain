@@ -18,7 +18,7 @@ class Signin extends React.Component {
   }
 
   onSubmitSignIn = () => {
-    fetch('http://localhost:3000/signin', {
+    fetch('http://192.168.99.100:3001/signin', {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -33,6 +33,7 @@ class Signin extends React.Component {
           this.props.onRouteChange('home');
         }
       })
+      .catch(err => console.log(err.message))
   }
 
   render() {
