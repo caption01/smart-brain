@@ -1,4 +1,5 @@
 import React from 'react';
+import './sign.css'
 
 class Signin extends React.Component {
   constructor(props) {
@@ -17,6 +18,10 @@ class Signin extends React.Component {
     this.setState({signInPassword: event.target.value})
   }
 
+  saveAuthTokenInSession = (token) => {
+    window.sessionStorage.setItem('token', token)
+  }
+
   onSubmitSignIn = () => {
     fetch('http://192.168.99.100:3001/signin', {
       method: 'post',
@@ -27,10 +32,22 @@ class Signin extends React.Component {
       })
     })
       .then(response => response.json())
-      .then(user => {
-        if (user.id) {
-          this.props.loadUser(user)
-          this.props.onRouteChange('home');
+      .then(data => {
+        if (data.userId && data.success === 'true') {
+          this.saveAuthTokenInSession(data.token)
+          fetch(`http://192.168.99.100:3001/profile/${data.userId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': data.token
+            }
+          }).then(resp => resp.json())
+          .then(user => {
+            if ( user && user.email ) {
+              this.props.loadUser(user)
+              this.props.onRouteChange('home')
+            }
+          })
         }
       })
       .catch(err => console.log(err.message))
@@ -47,7 +64,7 @@ class Signin extends React.Component {
               <div className="mt3">
                 <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
                 <input
-                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
+                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 hover-black"
                   type="email"
                   name="email-address"
                   id="email-address"
@@ -57,7 +74,7 @@ class Signin extends React.Component {
               <div className="mv3">
                 <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
                 <input
-                  className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
+                  className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 hover-black"
                   type="password"
                   name="password"
                   id="password"
@@ -68,7 +85,7 @@ class Signin extends React.Component {
             <div className="">
               <input
                 onClick={this.onSubmitSignIn}
-                className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
+                className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib hover-black"
                 type="submit"
                 value="Sign in"
               />
